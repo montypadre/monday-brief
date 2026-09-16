@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/MondayBrief.Api/MondayBrief.Api.csproj" />
+    <Project Path="src/MondayBrief.Core/MondayBrief.Core.csproj" />
+    <Project Path="src/MondayBrief.Seed/MondayBrief.Seed.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/MondayBrief.Evals/MondayBrief.Evals.csproj" />
+  </Folder>
+</Solution>
