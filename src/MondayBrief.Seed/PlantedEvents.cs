@@ -36,7 +36,7 @@ public static class PlantedEvents
     public static readonly DateOnly CyberMonday = new(2025, 12, 1);
     public static readonly DateOnly HolidayPeakStart = new(2025, 12, 13);
     public static readonly DateOnly OnlineShippingCutoff = new(2025, 12, 18);
-    public static readonly DateOnly ChrsitmasEve = new(2025, 12, 24);
+    public static readonly DateOnly ChristmasEve = new(2025, 12, 24);
     public static readonly DateOnly Christmas = new(2025, 12, 25);
 
     // 4. Quiet decline: slow at first, then accelerating (1 - 0.80·t²). About half of June's rate by August.

@@ -14,7 +14,7 @@ public static class DemandModel
     
     public static Hours StoreHours(DateOnly d)
     {
-        if (d == StormPrepDay || d == ChrsitmasEve)
+        if (d == StormPrepDay || d == ChristmasEve)
         {
             return new Hours(7, 14);
         }
@@ -114,12 +114,12 @@ public static class DemandModel
             return 1.10 + 0.50 * Progress(d, HolidayRampStart, HolidayPeakStart);
         }
 
-        if (InRange(d, HolidayPeakStart, ChrsitmasEve.AddDays(-1)))
+        if (InRange(d, HolidayPeakStart, ChristmasEve.AddDays(-1)))
         {
             return 1.90;
         }
 
-        if (d == ChrsitmasEve)
+        if (d == ChristmasEve)
         {
             return 1.30;
         }
@@ -193,7 +193,7 @@ public static class DemandModel
             return 2.20;
         }
 
-        if (InRange(d, OnlineShippingCutoff.AddDays(1), ChrsitmasEve))
+        if (InRange(d, OnlineShippingCutoff.AddDays(1), ChristmasEve))
         {
             return 0.90;
         }
@@ -233,7 +233,7 @@ public static class DemandModel
             InRange(d, MardiGrasRampStart, FatTuesday) ? 5.0
             : InRange(d, TwelfthNight, MardiGrasRampStart.AddDays(-1)) ? 2.0
             : 1.0,
-        ProductSeason.Holiday => InRange(d, HolidayRampStart, ChrsitmasEve) ? 6.0 : 0.4,
+        ProductSeason.Holiday => InRange(d, HolidayRampStart, ChristmasEve) ? 6.0 : 0.4,
         ProductSeason.Winter => d.Month switch
         {
             11 or 12 or 1 or 2 => 2.5,

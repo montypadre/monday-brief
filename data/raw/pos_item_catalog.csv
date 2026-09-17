@@ -1,0 +1,25 @@
+SKU,Item Name, Department,Retail Price,Active
+CB-DRIP-12,"Drip Coffee, 12 oz",Coffee Bar,3.25,Y
+CB-LATTE-12,Latte 12 oz,Coffee Bar,5.25,Y
+CB-CHAI-12,Chai Latte 12 oz,Coffee Bar,5.00,Y
+CB-COLD-16,Cold Brew 16 oz,Coffee Bar,4.75,Y
+CB-MUFF-01,Praline Muffin,Coffee Bar,3.75,Y
+CB-BEIG-03,Beignets (3),Coffee Bar,4.50,Y
+LG-MARM-01,Satsuma Marmalade,Local Goods,9.50,Y
+LG-HONEY-01,Tupelo Honey 12 oz,Local Goods,14.00,Y
+LG-PRALN-06,Pecan Pralines (6-pack),Local Goods,12.00,Y
+LG-SALT-01,Gulf Sea Salt,Local Goods,8.00,Y
+LG-HOTS-01,Bayou Heat Hot Sauce,Local Goods,7.50,Y
+LG-CNDL-01,Magnolia Bay Soy Candle,Local Goods,24.00,Y
+HG-FRAME-01,Driftwood Picture Frame,Home & Gifts,28.00,Y
+HG-BEADS-01,Mardi Gras Bead Garland,Home & Gifts,16.00,Y
+HG-COAST-04,Pelican Coaster Set (4),Home & Gifts,22.00,Y
+HG-TOWEL-01,Coastal Tea Towel,Home & Gifts,14.00,Y
+HG-ORNA-01,Oyster Shell Ornament,Home & Gifts,18.00,Y
+HG-PRINT-01,Marsh at Dusk Art Print,Home & Gifts,35.00,Y
+AP-TEE-01,Bayside Logo Tee,Apparel,26.00,Y
+AP-HOOD-01,Eastern Shore Hoodie,Apparel,48.00,Y
+AP-HAT-01,Pelican Trucker Hat,Apparel,24.00,Y
+AP-KIDS-01,Kids Crab Tee,Apparel,20.00,Y
+AP-TOTE-01,Canvas Beach Tote,Apparel,30.00,Y
+AP-KREWE-01,Krewe Tee,Apparel,28.00,Y

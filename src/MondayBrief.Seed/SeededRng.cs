@@ -28,7 +28,7 @@ public sealed class SeededRng(ulong seed)
         var u1 = 1.0 - NextDouble();
         var u2 = NextDouble();
         var z = Math.Sqrt(-2.0 * Math.Log(u1)) * Math.Cos(2.0 * Math.PI * u2);
-        return mean * stdDev * z;
+        return mean + stdDev * z;
     }
 
     public int Poisson(double lambda)
