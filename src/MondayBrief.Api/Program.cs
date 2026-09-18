@@ -25,6 +25,7 @@ builder.Services.AddScoped<IDataSourceAdapter, EcommerceJsonAdapter>();
 builder.Services.AddScoped<IDataSourceAdapter, AnalyticsCsvAdapter>();
 builder.Services.AddScoped<IngestionService>();
 builder.Services.AddScoped<KpiService>();
+builder.Services.AddScoped<TimeSeriesService>();
 
 var app = builder.Build();
 
@@ -82,6 +83,23 @@ app.MapGet("/api/kpis", async (
 
     return Results.Ok(await kpis.GetSummaryAsync(dateRange, ct));
 }); 
+
+app.MapGet("/api/timeseries", async(
+    string? metric,
+    string? by,
+    string? bucket,
+    string? range,
+    TimeSeriesService series,
+    IOptions<AppOptions> options,
+    CancellationToken ct) =>
+{
+    if (!TimeSeriesRequest.TryParse(metric, by, bucket, range, options.Value.AsOfDate, out var request, out var error))
+    {
+        return Results.BadRequest(new { error });
+    }
+
+    return Results.Ok(await series.GetAsync(request, ct));
+});
 
 app.Run();
 
