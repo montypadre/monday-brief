@@ -4,6 +4,7 @@ public static class SourceSystems
 {
     public const string Pos = "pos";
     public const string Ecommerce = "ecommerce";
+    public const string Analytics = "analytics";
 }
 
 /// <summary>
