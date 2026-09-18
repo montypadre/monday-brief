@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
-
 using MondayBrief.Core.Data;
 using MondayBrief.Core.Ingestion;
 using MondayBrief.Core.Ingestion.Adapters;
+using MondayBrief.Core.Kpis;
 using MondayBrief.Core.Options;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,6 +24,7 @@ builder.Services.AddScoped<IDataSourceAdapter, PosCsvAdapter>();
 builder.Services.AddScoped<IDataSourceAdapter, EcommerceJsonAdapter>();
 builder.Services.AddScoped<IDataSourceAdapter, AnalyticsCsvAdapter>();
 builder.Services.AddScoped<IngestionService>();
+builder.Services.AddScoped<KpiService>();
 
 var app = builder.Build();
 
@@ -67,6 +68,20 @@ app.MapGet("/api/health", async (IOptions<AppOptions> options, MondayBriefDbCont
         trafficDays = await db.DailyTraffic.CountAsync(ct),
     });
 });
+
+app.MapGet("/api/kpis", async (
+    string? range,
+    KpiService kpis,
+    IOptions<AppOptions> options,
+    CancellationToken ct) =>
+{
+    if (!RangeParser.TryParse(range, options.Value.AsOfDate, out var dateRange, out var error))
+    {
+        return Results.BadRequest(new { error });
+    }
+
+    return Results.Ok(await kpis.GetSummaryAsync(dateRange, ct));
+}); 
 
 app.Run();
 
