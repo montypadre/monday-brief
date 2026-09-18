@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+
 using MondayBrief.Core.Data;
+using MondayBrief.Core.Ingestion;
+using MondayBrief.Core.Ingestion.Adapters;
 using MondayBrief.Core.Options;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,16 +16,43 @@ var connectionString = SqlitePaths.ResolveConnectionString(rawConnectionString, 
 
 builder.Services.AddDbContext<MondayBriefDbContext>(options => options.UseSqlite(connectionString));
 
+builder.Services.AddSingleton(sp =>
+    BusinessClock.FromId(sp.GetRequiredService<IOptions<AppOptions>>().Value.TimeZoneId));
+
+// Adding a new client system means registering one more adapter here.
+builder.Services.AddScoped<IDataSourceAdapter, PosCsvAdapter>();
+builder.Services.AddScoped<IDataSourceAdapter, EcommerceJsonAdapter>();
+builder.Services.AddScoped<IDataSourceAdapter, AnalyticsCsvAdapter>();
+builder.Services.AddScoped<IngestionService>();
+
 var app = builder.Build();
 
 // Code below Build() does not run under `dotnet ef`, so migrating here is safe for design-time tooling.
 using (var scope = app.Services.CreateScope())
 {
+    var services = scope.ServiceProvider;
     var db = scope.ServiceProvider.GetRequiredService<MondayBriefDbContext>();
     await db.Database.MigrateAsync();
+
+    // Ingestion is idempotent, but a full pass costs a few seconds, so only run it on an empty database.
+    if (!await db.Orders.AnyAsync())
+    {
+        var settings = services.GetRequiredService<IOptions<AppOptions>>().Value;
+        var rawDataPath = Path.GetFullPath(Path.Combine(app.Environment.ContentRootPath, settings.RawDataPath));
+        var report = await services.GetRequiredService<IngestionService>().IngestAsync(rawDataPath);
+
+        var logger = services.GetRequiredService<ILogger<Program>>();
+        foreach (var source in report.Sources)
+        {
+            logger.LogInformation("Ingested {Source}: {Orders} orders, {Products} products, {Traffic} traffic days",
+                source.DisplayName, source.OrdersRead, source.ProductsRead, source.TrafficRowsRead);
+        }
+
+        logger.LogInformation("Ingestion complete: {Report}", report);
+    }
 }
 
-app.MapGet("/api/health", async (IOptions<AppOptions> options, MondayBriefDbContext db, CancellationToken ct) => 
+app.MapGet("/api/health", async (IOptions<AppOptions> options, MondayBriefDbContext db, CancellationToken ct) =>
 {
     var settings = options.Value;
     return Results.Ok(new
@@ -33,6 +63,7 @@ app.MapGet("/api/health", async (IOptions<AppOptions> options, MondayBriefDbCont
         channels = await db.Channels.CountAsync(ct),
         products = await db.Products.CountAsync(ct),
         orders = await db.Orders.CountAsync(ct),
+        orderLines = await db.OrderLines.CountAsync(ct),
         trafficDays = await db.DailyTraffic.CountAsync(ct),
     });
 });
