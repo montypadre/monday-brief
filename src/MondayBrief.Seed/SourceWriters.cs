@@ -55,6 +55,7 @@ public static class SourceWriters
                 writer.Write(Csv(line.Product.Sku)); writer.Write(',');
                 writer.Write(Csv(line.Product.Name)); writer.Write(',');
                 writer.Write(Csv(line.Product.Category)); writer.Write(',');
+                writer.Write(line.Quantity.ToString(Inv)); writer.Write(',');
                 writer.Write(Dollars(line.Product.PriceCents)); writer.Write(',');
                 writer.WriteLine(Dollars(line.LineTotalCents));
             }
