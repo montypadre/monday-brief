@@ -1,4 +1,5 @@
 using System.Threading.RateLimiting;
+using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MondayBrief.Core.Ai;
@@ -9,7 +10,7 @@ using MondayBrief.Core.Ingestion.Adapters;
 using MondayBrief.Core.Kpis;
 using MondayBrief.Core.Options;
 using Microsoft.AspNetCore.RateLimiting;
-
+using MondayBrief.Core.Briefs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,6 +37,7 @@ builder.Services.AddScoped<BusinessTools>();
 builder.Services.Configure<AnthropicOptions>(builder.Configuration.GetSection(AnthropicOptions.SectionName));
 builder.Services.AddHttpClient<IAnthropicClient, AnthropicClient>();
 builder.Services.AddScoped<AskService>();
+builder.Services.AddScoped<BriefService>();
 
 // The demo is public; /ask costs money per call.
 builder.Services.AddRateLimiter(limiter =>
@@ -151,6 +153,35 @@ app.MapPost("/api/ask", async (AskRequest body, AskService ask, ILogger<Program>
     {
         Logger.LogError(ex, "Anthropic call failed");
         return Results.Problem("The assistant is unavailable right now.", statusCode: StatusCodes.Status502BadGateway);
+    }
+}).RequireRateLimiting("ask");
+
+app.MapGet("/api/brief/latest", async (BriefService briefs, CancellationToken ct) =>
+{
+    var brief = await briefs.GetLatestAsync(ct);
+    return brief is null
+        ? Results.NotFound(new { error = "No brief has been generated yet." })
+        : Results.Ok(new
+        {
+            weekStart = brief.WeekStart,
+            text = brief.RenderedText,
+            content = JsonDocument.Parse(brief.Json).RootElement,
+            model = brief.Model,
+            generatedUtc = brief.CreatedUtc,
+        });
+});
+
+app.MapPost("/api/brief/generate", async (BriefService briefs, ILogger<Program> logger, CancellationToken ct) =>
+{
+    try
+    {
+        var brief = await briefs.GeneratedAsync(cancellationToken: ct);
+        return Results.Ok(new { weekStart = brief.WeekStart, text = brief.RenderedText, model = brief.Model });
+    }
+    catch (AnthropicException ex)
+    {
+        logger.LogError(ex, "Brief generation failed");
+        return Results.Problem("Could not generate a brief right now.", statusCode: StatusCodes.Status502BadGateway);
     }
 }).RequireRateLimiting("ask");
 

@@ -13,4 +13,4 @@ public sealed record TriggeredAlert(
     DateOnly WindowEnd,
     DateOnly? ComparedToStart,
     DateOnly? ComparedToEnd,
-    string message);
+    string Message);

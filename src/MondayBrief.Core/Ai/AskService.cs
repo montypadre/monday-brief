@@ -171,6 +171,7 @@ public sealed class AskService(
             5. Say which dates you used, in plain words such as "in March" or "over the last 30 days".
             6. Answer in two to four sentences. Plain language, no jargon. Give figures context rather than listing 
                bare numbers.
+            7. Quote figures exactly as the fact sheet gives them. Never round, approximate, or write "nearly", "about", or "roughly" in front of a number.
             """;
     }
 
