@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <ItemGroup>
     <ProjectReference Include="..\MondayBrief.Core\MondayBrief.Core.csproj" />
@@ -13,6 +13,7 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <UserSecretsId>5403a835-0843-434b-b05f-a29dc2607818</UserSecretsId>
   </PropertyGroup>
 
 </Project>

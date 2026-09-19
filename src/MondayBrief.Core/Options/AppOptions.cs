@@ -15,4 +15,7 @@ public sealed class AppOptions
 
     /// <summary>Folder holding the raw source files. Relative paths resolve from the content root.</summary>
     public string RawDataPath { get; set; } = "../../data/raw";
+
+    /// <summary>The demo business the assistant is answering about.</summary>
+    public string BusinessName { get; set; } = "Bayside Mercantile";
 }

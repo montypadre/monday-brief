@@ -1,3 +1,4 @@
+using System.Threading.RateLimiting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MondayBrief.Core.Ai;
@@ -7,6 +8,8 @@ using MondayBrief.Core.Ingestion;
 using MondayBrief.Core.Ingestion.Adapters;
 using MondayBrief.Core.Kpis;
 using MondayBrief.Core.Options;
+using Microsoft.AspNetCore.RateLimiting;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -30,8 +33,25 @@ builder.Services.AddScoped<KpiService>();
 builder.Services.AddScoped<TimeSeriesService>();
 builder.Services.AddScoped<AlertService>();
 builder.Services.AddScoped<BusinessTools>();
+builder.Services.Configure<AnthropicOptions>(builder.Configuration.GetSection(AnthropicOptions.SectionName));
+builder.Services.AddHttpClient<IAnthropicClient, AnthropicClient>();
+builder.Services.AddScoped<AskService>();
+
+// The demo is public; /ask costs money per call.
+builder.Services.AddRateLimiter(limiter =>
+{
+    limiter.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+    limiter.AddFixedWindowLimiter("ask", options =>
+    {
+        options.PermitLimit = 10;
+        options.Window = TimeSpan.FromMinutes(1);
+        options.QueueLimit = 0;
+    });
+});
 
 var app = builder.Build();
+
+app.UseRateLimiter();
 
 // Code below Build() does not run under `dotnet ef`, so migrating here is safe for design-time tooling.
 using (var scope = app.Services.CreateScope())
@@ -111,7 +131,32 @@ app.MapGet("/api/alerts", async(
     CancellationToken ct) =>
     Results.Ok(await alerts.EvaluateAsOfAsync(options.Value.AsOfDate, ct)));
 
+app.MapPost("/api/ask", async (AskRequest body, AskService ask, ILogger<Program> Logger, CancellationToken ct) =>
+{
+    if (string.IsNullOrWhiteSpace(body.Question))
+    {
+        return Results.BadRequest(new { error = "Ask a question about the business." });
+    }
+
+    if (body.Question.Length > 500)
+    {
+        return Results.BadRequest(new { error = "Question is too long; keep it under 500 characrers." });
+    }
+
+    try
+    {
+        return Results.Ok(await ask.AskAsync(body.Question, ct));
+    }
+    catch (AnthropicException ex)
+    {
+        Logger.LogError(ex, "Anthropic call failed");
+        return Results.Problem("The assistant is unavailable right now.", statusCode: StatusCodes.Status502BadGateway);
+    }
+}).RequireRateLimiting("ask");
+
 app.Run();
 
 // Lets WebApplicationFactory reach the entry point from test projects later.
 public partial class Program;
+
+public sealed record AskRequest(string Question);
