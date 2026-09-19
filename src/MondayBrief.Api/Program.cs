@@ -1,5 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using MondayBrief.Core.Ai;
+using MondayBrief.Core.Alerts;
 using MondayBrief.Core.Data;
 using MondayBrief.Core.Ingestion;
 using MondayBrief.Core.Ingestion.Adapters;
@@ -26,6 +28,8 @@ builder.Services.AddScoped<IDataSourceAdapter, AnalyticsCsvAdapter>();
 builder.Services.AddScoped<IngestionService>();
 builder.Services.AddScoped<KpiService>();
 builder.Services.AddScoped<TimeSeriesService>();
+builder.Services.AddScoped<AlertService>();
+builder.Services.AddScoped<BusinessTools>();
 
 var app = builder.Build();
 
@@ -100,6 +104,12 @@ app.MapGet("/api/timeseries", async(
 
     return Results.Ok(await series.GetAsync(request, ct));
 });
+
+app.MapGet("/api/alerts", async(
+    AlertService alerts,
+    IOptions<AppOptions> options,
+    CancellationToken ct) =>
+    Results.Ok(await alerts.EvaluateAsOfAsync(options.Value.AsOfDate, ct)));
 
 app.Run();
 

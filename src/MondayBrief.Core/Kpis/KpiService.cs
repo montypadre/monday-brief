@@ -20,8 +20,8 @@ public sealed class KpiService(MondayBriefDbContext db)
     {
         var previous = range.Previous();
 
-        var current = await GetTotalsAsync(range, cancellationToken);
-        var before = await GetTotalsAsync(previous, cancellationToken);
+        var current = await GetTotalsAsync(range, null, cancellationToken);
+        var before = await GetTotalsAsync(previous, null, cancellationToken);
 
         var currentProducts = await GetProductTotalsAsync(range, cancellationToken);
         var previousProducts = await GetProductTotalsAsync(previous, cancellationToken);
@@ -33,10 +33,15 @@ public sealed class KpiService(MondayBriefDbContext db)
             BuildDecliners(currentProducts, previousProducts, 3));
     }
 
-    public async Task<PeriodTotals> GetTotalsAsync(DateRange range, CancellationToken cancellationToken = default)
+    public async Task<PeriodTotals> GetTotalsAsync(DateRange range, int? channelId = null, CancellationToken cancellationToken = default)
     {
         var orders = db.Orders.Where(o => o.BusinessDate >= range.Start && o.BusinessDate <= range.End);
 
+        if (channelId is { } channel)
+        {
+            orders = orders.Where(o => o.ChannelId == channel);
+        }
+        
         var revenue = await orders.SumAsync(o => (long?)o.SubtotalCents, cancellationToken) ?? 0;
         var count = await orders.CountAsync(cancellationToken);
         var online = await orders.CountAsync(o => o.ChannelId == ChannelIds.Online, cancellationToken);
@@ -59,6 +64,15 @@ public sealed class KpiService(MondayBriefDbContext db)
                 g.Sum(l => l.LineTotalCents),
                 g.Sum(l => l.Quantity)))
             .ToListAsync(cancellationToken);
+
+    /// <summary>The dates actually covered by ingested data. Tools refuse anything outside it.</summary>
+    public async Task<DateRange?> GetDataWindowAsync(CancellationToken cancellationToken = default)
+    {
+        var min = await db.Orders.MinAsync(o => (DateOnly?)o.BusinessDate, cancellationToken);
+        var max = await db.Orders.MaxAsync(o => (DateOnly?)o.BusinessDate, cancellationToken);
+
+        return min is null || max is null ? null : new DateRange(min.Value, max.Value);
+    }
 
     private static List<KpiCard> BuildCards(PeriodTotals current, PeriodTotals previous) =>
     [
