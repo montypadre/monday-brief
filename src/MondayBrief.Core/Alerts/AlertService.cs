@@ -1,4 +1,7 @@
+using System.Globalization;
+
 using Microsoft.EntityFrameworkCore;
+
 using MondayBrief.Core.Data;
 using MondayBrief.Core.Entities;
 using MondayBrief.Core.Kpis;
@@ -11,6 +14,8 @@ namespace MondayBrief.Core.Alerts;
 /// </summary>
 public sealed class AlertService(MondayBriefDbContext db, KpiService kpis)
 {
+    private static readonly CultureInfo Us = CultureInfo.GetCultureInfo("en-US");
+
     /// <summary>Each rule over its own window, ending on the last complete day before <paramref name="asOf"/>.</summary>
     public async Task<IReadOnlyList<TriggeredAlert>> EvaluateAsOfAsync(
         DateOnly asOf, CancellationToken cancellationToken = default)
@@ -68,7 +73,7 @@ public sealed class AlertService(MondayBriefDbContext db, KpiService kpis)
 
         var changePct = Math.Round(
             100m * (current.RevenueCents - before.RevenueCents) / before.RevenueCents, 1, MidpointRounding.AwayFromZero);
-        
+
         if (changePct >= (decimal)rule.Threshold)
         {
             return [];
@@ -82,7 +87,7 @@ public sealed class AlertService(MondayBriefDbContext db, KpiService kpis)
             new TriggeredAlert(
                 rule.Key, rule.Name, "Total revenue", "revenue", changePct, (decimal)rule.Threshold, "percent",
                 window.Start, window.End, previous.Start, previous.End,
-                $"Revenue for {window} was {currentDollars:C}, {changePct}% against {beforeDollars:C} the {window.Days} days before."),
+                $"Revenue for {Window(window)} was {Dollars(currentDollars)}, {changePct}% against {Dollars(beforeDollars)} the {window.Days} days before."),
         ];
     }
 
@@ -107,7 +112,7 @@ public sealed class AlertService(MondayBriefDbContext db, KpiService kpis)
             new TriggeredAlert(
                 rule.Key, rule.Name, "Online store", "conversion", rate, (decimal)rule.Threshold, "percent",
                 window.Start, window.End, null, null,
-                $"Online conversion for {window} was {rate}% from {totals.Sessions:N0} sessions, below the {rule.Threshold}% threshold."),
+                $"Online conversion for {Window(window)} was {rate}% from {totals.Sessions.ToString("N0", Us)} sessions, below the {rule.Threshold}% threshold."),
         ];
     }
 
@@ -134,10 +139,18 @@ public sealed class AlertService(MondayBriefDbContext db, KpiService kpis)
             alerts.Add(new TriggeredAlert(
                 rule.Key, rule.Name, product.Name, "units", changePct, (decimal)rule.Threshold, "percent",
                 window.Start, window.End, previous.Start, previous.End,
-                $"{product.Name} ({product.Sku}) sold {units} units in {window}, {changePct}% against {product.Units} the {window.Days} days before."));
+                $"{product.Name} ({product.Sku}) sold {units} units in {Window(window)}, {changePct}% against {product.Units} the {window.Days} days before."));
         }
 
         return [.. alerts.OrderBy(a => a.Value)];
     }
-    
+
+    /// <summary>Dates a persion reads alound, not a machine range. Screen readers say "2026-08-24" digit by digit.</summary>
+    private static string Window(DateRange window) =>
+     window.Start.Year == window.End.Year
+         ? $"{window.Start.ToString("MMMM d", Us)} to {window.End.ToString("MMMM d, yyyy", Us)}"
+         : $"{window.Start.ToString("MMMM d, yyyy", Us)} to {window.End.ToString("MMMM d, yyyy", Us)}";
+
+    /// <summary>Pinned to en-US so a host in another locale doesn't print euros.</summary>
+    private static string Dollars(decimal amount) => amount.ToString("C0", Us);
 }

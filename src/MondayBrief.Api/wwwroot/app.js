@@ -113,8 +113,10 @@ function fillTable(id, rows, toCells) {
 
     rows.forEach(rowData => {
         const row = document.createElement("tr");
-        toCells(rowData).forEach(cellData => {
-            const cell = document.createElement("td");
+        toCells(rowData).forEach((cellData, index) => {
+            const cell = document.createElement(index === 0 ? "th" : "td");
+            if (index === 0) cell.scope = "row";
+
             if (typeof cellData === "string") {
                 cell.textContent = cellData;
             } else {
@@ -141,6 +143,7 @@ async function loadChart(split) {
             data: series.points.map(point => point.value),
             borderColor: colors[index % colors.length],
             backgroundColor: colors[index % colors.length],
+            borderDash: index === 1 ? [6, 4] : [],
             borderWidth: 2,
             pointRadius: 0,
             pointHoverRadius: 4,
