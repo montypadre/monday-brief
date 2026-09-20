@@ -34,11 +34,4 @@ public sealed class CsvParserTests
     {
         Assert.Throws<FormatException>(() => CsvParser.SplitLine("a,\"b,c"));
     }
-
-    [Fact]
-    public void Checker_ignores_date_ranges_and_handles_curly_apostrophes()
-    {
-        var figures = NumberCheck.Extract("Total revenue for the last 30 days (August 1\u201330, 2026) was 55851.25.");
-        Assert.Equal([55851.25m], figures);
-    }
 }

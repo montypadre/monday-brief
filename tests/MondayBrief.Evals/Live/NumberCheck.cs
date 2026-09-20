@@ -16,7 +16,7 @@ public static partial class NumberCheck
     [GeneratedRegex(@"\d{4}-\d{2}-\d{2}")]
     private static partial Regex IsoDate();
 
-    [GeneratedRegex(@"\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}\s*[\u2013\u2014-]\s*\d{1,2}\b", RegexOptions.IgnoreCase)]
+    [GeneratedRegex(@"\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}\s*[^\d\s]\s*\d{1,2}\b", RegexOptions.IgnoreCase)]
     private static partial Regex SpelledDateRange();
 
     [GeneratedRegex(@"\b\d{1,2}\s+(January|February|March|April|May|June|July|August|September|October|November|December)\b|\b(January|February|March|April|May|June|July|August|September|October|November|December)\s+\d{1,2}\b", RegexOptions.IgnoreCase)]
