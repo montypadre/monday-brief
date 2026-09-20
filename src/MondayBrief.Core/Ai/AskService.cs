@@ -8,7 +8,7 @@ using MondayBrief.Core.Options;
 
 namespace MondayBrief.Core.Ai;
 
-public sealed record AskSource(string Tool, string Arguments, bool Ok, string? Error);
+public sealed record AskSource(string Tool, string Arguments, bool Ok, string? Error, string Payload);
 
 public sealed record AskResult(
     string Question,
@@ -71,16 +71,19 @@ public sealed class AskService(
             foreach (var call in reply.ToolCalls)
             {
                 var result = await ExecuteAsync(call, cancellationToken);
-                sources.Add(new AskSource(call.Name, Describe(call.Input), result.IsSuccess, result.Error));
+
+                var payload = result.IsSuccess
+                    ? JsonSerializer.Serialize(result.Data, ToolJson)
+                    : JsonSerializer.Serialize(new { error = result.Error }, ToolJson);
+
+                sources.Add(new AskSource(call.Name, Describe(call.Input), result.IsSuccess, result.Error, payload));
 
                 results.Add(new JsonObject
                 {
                     ["type"] = "tool_result",
                     ["tool_use_id"] = call.Id,
                     ["is_error"] = !result.IsSuccess,
-                    ["content"] = result.IsSuccess
-                        ? JsonSerializer.Serialize(result.Data, ToolJson)
-                        : JsonSerializer.Serialize(new { error = result.Error }, ToolJson),
+                    ["content"] = payload,
                 });
             }
 
