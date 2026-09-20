@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Monday Brief - Bayside Mercantile</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Skip to content</a>
+
+<header class="masthead">
+    <p class="shop">Bayside Mercantile</p>
+    <h1>Monday Brief</h1>
+    <p class="asof" id="asof"></p>
+</header>
+
+<main id="main">
+
+    <section class="brief" aria-labelledby="brief-heading">
+        <h2 id="brief-heading">This week</h2>
+        <div id="brief-body" class="brief-body">
+            <p class="loading">Loading the brief...</p>
+        </div>
+        <p class="attribution" id="brief-meta"></p>
+    </section>
+
+    <section aria-labelledby="numbers-heading">
+        <h2 id="number-heading">The numbers</h2>
+        <p class="range" id="kpi-range"></p>
+        <ul class="cards" id="cards">
+            <li class="loading">Loading figures...</li>
+        </ul>
+    </section>
+
+    <section aria-labelledby="chart-heading">
+        <h2 id="chart-heading">Revenue by day</h2>
+
+        <fieldset class="toggle">
+            <legend>Show</legend>
+            <label><input type="radio" name="split" value="all" checked> Both channels</label>
+            <label><input type="radio" name="split" value="channel"> Split by channel</label>
+        </fieldset>
+
+        <div class="chart-frame">
+            <canvas id="chart" role="img" aria-label="Daily revenue for the last 30 days"></canvas>
+        </div>
+
+        <details class="data-table">
+            <summary>View this chart as a table</summary>
+            <div class="scroller">
+                <table id="chart-table">
+                    <caption>Daily revenue</caption>
+                    <thead><tr><th scope="col">Date</th></tr></thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </details>
+    </section>
+
+    <section aria-labelledby="products-heading">
+        <h2 id="products-heading">Products</h2>
+
+        <h3>Best sellers</h3>
+        <div class="scroller">
+            <table id="top-products">
+                <caption class=""visually-hidden">Best selling products by revenue</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Product</th>
+                        <th scope="col" class="num">Revenue</th>
+                        <th scope="col" class="num">Units</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <h3>Falling fastest</h3>
+        <div class="scroller">
+            <table id="decliners">
+                <caption class="visually-hidden">Products with the steepest decline in units</caption>
+                <thead>
+                    <tr>
+                        <th scope="col">Products</th>
+                        <th scopr="col" class="num">Units</th>
+                        <th scope="col" class="num">Before</th>
+                        <th scope="col" class="num">Change</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </section>
+
+    <section aria-labelledby="alerts-heading">
+        <h2 id="alerts-heading">Worth a look</h2>
+        <ul class="alerts" id="alerts">
+            <li class="loading">Checking thresholds...</li>
+        </ul>
+    </section>
+
+    <section class="ask" aria-labelledby="ask-heading">
+        <h2 id="ask-heading">Ask your data</h2>
+        <p class="hint">Every figure in an answer comes from your own numbers. If the data can't answer, it says so.</p>
+
+        <form id="ask-form">
+            <label for="question">Your question</label>
+            <input type="text" id="question" name="question" maxlength="500" autocomplete="off"
+                   placeholder="What was online revenue in March?">
+            <button type="submit" id="ask-button">Ask</button>
+        </form>
+
+        <div id="answer" class="answer" aria-live="polite"></div>
+    </section>
+</main>
+
+<footer>
+    <p>Fictional data for demonstration. Built by Michael Reynolds.</p>
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

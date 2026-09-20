@@ -175,6 +175,7 @@ public sealed class AskService(
             6. Answer in two to four sentences. Plain language, no jargon. Give figures context rather than listing 
                bare numbers.
             7. Quote figures exactly as the fact sheet gives them. Never round, approximate, or write "nearly", "about", or "roughly" in front of a number.
+            8. Write money with a dollar sign and thousands separators ($15,560.50) and rates with a percent sign.
             """;
     }
 

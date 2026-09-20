@@ -54,6 +54,8 @@ builder.Services.AddRateLimiter(limiter =>
 var app = builder.Build();
 
 app.UseRateLimiter();
+app.UseDefaultFiles();
+app.UseStaticFiles();
 
 // Code below Build() does not run under `dotnet ef`, so migrating here is safe for design-time tooling.
 using (var scope = app.Services.CreateScope())
