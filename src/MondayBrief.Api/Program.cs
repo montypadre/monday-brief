@@ -1,5 +1,7 @@
 using System.Threading.RateLimiting;
 using System.Text.Json;
+using System.Security.Cryptography;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using MondayBrief.Core.Ai;
@@ -110,9 +112,9 @@ app.MapGet("/api/kpis", async (
     }
 
     return Results.Ok(await kpis.GetSummaryAsync(dateRange, ct));
-}); 
+});
 
-app.MapGet("/api/timeseries", async(
+app.MapGet("/api/timeseries", async (
     string? metric,
     string? by,
     string? bucket,
@@ -129,7 +131,7 @@ app.MapGet("/api/timeseries", async(
     return Results.Ok(await series.GetAsync(request, ct));
 });
 
-app.MapGet("/api/alerts", async(
+app.MapGet("/api/alerts", async (
     AlertService alerts,
     IOptions<AppOptions> options,
     CancellationToken ct) =>
@@ -186,6 +188,42 @@ app.MapPost("/api/brief/generate", async (BriefService briefs, ILogger<Program> 
         return Results.Problem("Could not generate a brief right now.", statusCode: StatusCodes.Status502BadGateway);
     }
 }).RequireRateLimiting("ask");
+
+// For the WordPress block: the brief plus three headline cards, in one call, behind a key.
+app.MapGet("/api/wp/summary", async (
+   HttpRequest request,
+   IConfiguration config,
+   BriefService briefs,
+   KpiService kpis,
+   IOptions<AppOptions> options,
+   CancellationToken ct) =>
+{
+    var expected = config["WordPress:ApiKey"];
+    if (string.IsNullOrWhiteSpace(expected))
+    {
+        return Results.Problem("WordPress access is not configured.", statusCode: StatusCodes.Status503ServiceUnavailable);
+    }
+
+    var supplied = request.Headers["X-Api-Key"].ToString();
+
+    // Constant-time comparison, so response timing can't be used to guess the key.
+    if (!CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(supplied), Encoding.UTF8.GetBytes(expected)))
+    {
+        return Results.Unauthorized();
+    }
+
+    var brief = await briefs.GetLatestAsync(ct);
+    var summary = await kpis.GetSummaryAsync(DateRange.LastDays(options.Value.AsOfDate, 30), ct);
+
+    return Results.Ok(new
+    {
+        weekStart = brief?.WeekStart,
+        text = brief?.RenderedText,
+        model = brief?.Model,
+        range = summary.Range,
+        cards = summary.Cards.Where(c => c.Key is "revenue" or "orders" or "conversion"),
+    });
+});
 
 app.Run();
 

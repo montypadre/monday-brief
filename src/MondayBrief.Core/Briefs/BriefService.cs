@@ -155,6 +155,8 @@ public sealed class BriefService(
         - Frame the action as a suggestion, not an order.
         - The whole brief must read in under a minute: 120 to 160 words once assembled.
         - Quote figures exactly as the fact sheet gives them. Never round, approximate, or write "nearly", "about" or "roughly" in front of a number.
+        - Write money with a dollar sign, thousands separators and cents ($13,464.50, $2,145.00). Write rates with a percent sign.
+        - When comparing periods, say "the four weeks before" or "the weeks before", not "four weeks ago".
 
         Reply with JSON only. No preamble, no markdown fences. Shape:
         {
