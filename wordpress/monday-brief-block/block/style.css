@@ -1,0 +1,32 @@
+.monday-brief__text p { margin: 0 0 0.75em; }
+.monday-brief__text p:first-child { font-size: 1.15em; }
+
+.monday-brief__cards {
+    list-style: none;
+    margin: 1.5em 0 1em;
+    padding: 0;
+    display: grid;
+    gap: 1px;
+    grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+    border: 1px solid currentColor;
+    background: currentColor;
+}
+
+.monday-brief__card {
+    background: var(--wp--preset--color--base, #fff);
+    padding: 0.85em 1em;
+}
+
+.monday-brief__label,
+.monday-brief__value,
+-monday-brief__delta { display: block; }
+
+.monday-brief__label { font-size: 0.875em; opacity: 0.8; }
+.monday-brief__value { font-size: 1.5em; font-variant-numeric: tabular-nums; }
+.monday-brief__delta { font-size: 0.875em; font-variant-numeric: tabular-nums; }
+
+.monday-brief__delta.is-up { color: #3f6b4a; }
+.monday-brief__delta.is-down { color: #9b3b2e; }
+
+.monday-brief__meta,
+.monday-brief__notice { font-size: 0.875em; opacity: 0.8; }

@@ -1,0 +1,29 @@
+{
+    "$schema": "https://schemas.wp.org/trunk/block.json",
+    "apiVersion": 3,
+    "name": "monday-brief/summary",
+    "version" : "0.2.0",
+    "title": "Monday Brief",
+    "category": "widgets",
+    "icon": "chart-line",
+    "description": "The latest weekly buiness brief and headline figures from a Monday Brief API.",
+    "keywords": [ "kpi", "dashboard", "brief", "report" ],
+    "textdomain": "monday-brief-block",
+    "attributes": {
+        "showCards": {
+            "type": "boolean",
+            "default": true
+        }
+    },
+    "supports": {
+        "html": false,
+        "align": [ "wide" ],
+        "spacing": {
+            "margin": true,
+            "padding": true
+        }
+    },
+    "editorScript": "file:./index.js",
+    "style": "file:./style.css",
+    "render": "file:./render.php"
+}
