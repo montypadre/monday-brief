@@ -485,3 +485,6 @@ App_Data/
 *.db
 *.db-shm
 *.db-wal
+
+# The deployment snapshot is committed deliberately; every other database stays local.
+!deploy/mondaybrief.db

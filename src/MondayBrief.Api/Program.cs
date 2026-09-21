@@ -84,7 +84,12 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-app.MapGet("/api/health", async (IOptions<AppOptions> options, MondayBriefDbContext db, CancellationToken ct) =>
+app.MapGet("/api/health", async (
+    IOptions<AppOptions> options,
+    IConfiguration config, 
+    IWebHostEnvironment environment,
+    MondayBriefDbContext db, 
+    CancellationToken ct) =>
 {
     var settings = options.Value;
     return Results.Ok(new
@@ -92,6 +97,7 @@ app.MapGet("/api/health", async (IOptions<AppOptions> options, MondayBriefDbCont
         status = "ok",
         name = settings.DisplayName,
         asOfDate = settings.AsOfDate,
+        askRequiresPasscode = environment.IsProduction() || !string.IsNullOrEmpty(config["Demo:AskPasscode"]),
         channels = await db.Channels.CountAsync(ct),
         products = await db.Products.CountAsync(ct),
         orders = await db.Orders.CountAsync(ct),
@@ -137,8 +143,32 @@ app.MapGet("/api/alerts", async (
     CancellationToken ct) =>
     Results.Ok(await alerts.EvaluateAsOfAsync(options.Value.AsOfDate, ct)));
 
-app.MapPost("/api/ask", async (AskRequest body, AskService ask, ILogger<Program> Logger, CancellationToken ct) =>
+app.MapPost("/api/ask", async (
+    AskRequest body,
+    HttpRequest request,
+    IConfiguration config,
+    IWebHostEnvironment environment, 
+    AskService ask, 
+    ILogger<Program> logger, 
+    CancellationToken ct) =>
 {
+    var passcode = config["Demo:AskPasscode"];
+
+    // Fail closed: in production, no configured passcode means no live questions at all.
+     if (string.IsNullOrEmpty(passcode) && environment.IsProduction())
+    {
+        return Results.Json(
+            new { error = "Live questions are turned off in this demo." },
+            statusCode: StatusCodes.Status503ServiceUnavailable);
+    }
+
+    if (!string.IsNullOrEmpty(passcode) && !SecretMatches(request.Headers["X-Ask-Passcode"].ToString(), passcode))
+    {
+        return Results.Json(
+            new { error = "Live questions need the demo passcode." },
+            statusCode: StatusCodes.Status401Unauthorized);
+    }
+
     if (string.IsNullOrWhiteSpace(body.Question))
     {
         return Results.BadRequest(new { error = "Ask a question about the business." });
@@ -155,7 +185,7 @@ app.MapPost("/api/ask", async (AskRequest body, AskService ask, ILogger<Program>
     }
     catch (AnthropicException ex)
     {
-        Logger.LogError(ex, "Anthropic call failed");
+        logger.LogError(ex, "Anthropic call failed");
         return Results.Problem("The assistant is unavailable right now.", statusCode: StatusCodes.Status502BadGateway);
     }
 }).RequireRateLimiting("ask");
@@ -175,8 +205,19 @@ app.MapGet("/api/brief/latest", async (BriefService briefs, CancellationToken ct
         });
 });
 
-app.MapPost("/api/brief/generate", async (BriefService briefs, ILogger<Program> logger, CancellationToken ct) =>
+app.MapPost("/api/brief/generate", async (
+    BriefService briefs,
+    IConfiguration config,
+    IWebHostEnvironment environment, 
+    ILogger<Program> logger, 
+    CancellationToken ct) =>
 {
+    // On by default in development, off by default in production.
+    if (!config.GetValue("Demo:AllowBriefGeneration", !environment.IsProduction()))
+    {
+        return Results.NotFound();
+    }
+    
     try
     {
         var brief = await briefs.GeneratedAsync(cancellationToken: ct);
@@ -204,10 +245,8 @@ app.MapGet("/api/wp/summary", async (
         return Results.Problem("WordPress access is not configured.", statusCode: StatusCodes.Status503ServiceUnavailable);
     }
 
-    var supplied = request.Headers["X-Api-Key"].ToString();
-
     // Constant-time comparison, so response timing can't be used to guess the key.
-    if (!CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(supplied), Encoding.UTF8.GetBytes(expected)))
+    if (!SecretMatches(request.Headers["X-Api-Key"].ToString(), expected))
     {
         return Results.Unauthorized();
     }
@@ -224,6 +263,10 @@ app.MapGet("/api/wp/summary", async (
         cards = summary.Cards.Where(c => c.Key is "revenue" or "orders" or "conversion"),
     });
 });
+
+// Constant-time comparison, so response timing can't be used to guess a key or passcode.
+static bool SecretMatches(string supplied, string expected) =>
+    CryptographicOperations.FixedTimeEquals(Encoding.UTF8.GetBytes(supplied), Encoding.UTF8.GetBytes(expected));
 
 app.Run();
 

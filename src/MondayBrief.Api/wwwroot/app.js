@@ -38,7 +38,7 @@ function deltaText(card) {
         ? ` (${card.changePoints > 0 ? "+" : ""}${card.changePoints} points)`
         : "";
 
-    return { text: `${symbol} ${direction} ${size}${points} on the period before`, cls: direction};
+    return { text: `${symbol} ${direction} ${size}${points} on the period before`, cls: direction };
 }
 
 async function loadBrief() {
@@ -65,7 +65,7 @@ async function loadKpis() {
     try {
         const kpis = await getJson(`/api/kpis?range=${RANGE}`);
 
-        document.getElementById("kpi-range").textContent = 
+        document.getElementById("kpi-range").textContent =
             `${formatDate(kpis.range.start, longDate)} to ${formatDate(kpis.range.end, longDate)}, against the ${kpis.range.days} days before.`;
 
         list.innerHTML = "";
@@ -73,8 +73,8 @@ async function loadKpis() {
             const delta = deltaText(card);
             const item = document.createElement("li");
             item.className = "card";
-            item.innerHTML = 
-                `<span class="card-label">${card.label}</span>` + 
+            item.innerHTML =
+                `<span class="card-label">${card.label}</span>` +
                 `<span class="card-value">${formatValue(card.value, card.format)}</span>` +
                 `<span class="card-delta ${delta.cls}">${delta.text}</span>`;
             list.appendChild(item);
@@ -181,7 +181,7 @@ async function loadChart(split) {
 
         buildChartTable(data);
     } catch (error) {
-        document.getElementById("chart-table").querySelector("tbody").innerHTML = 
+        document.getElementById("chart-table").querySelector("tbody").innerHTML =
             `<tr><td class="error">Couldn't load the chart. ${error.message}</td></tr>`;
     }
 }
@@ -233,7 +233,7 @@ async function loadAlerts() {
 
         alerts.forEach(alert => {
             const item = document.createElement("li");
-            item.innerHTML = 
+            item.innerHTML =
                 `<span class="alert-subject">${alert.subject}</span>` +
                 `<p class="alert-message">${alert.message}</p>`;
             list.appendChild(item);
@@ -248,6 +248,7 @@ function setUpAsk() {
     const input = document.getElementById("question");
     const button = document.getElementById("ask-button");
     const output = document.getElementById("answer");
+    const passcode = document.getElementById("passcode");
 
     form.addEventListener("submit", async event => {
         event.preventDefault();
@@ -261,7 +262,10 @@ function setUpAsk() {
         try {
             const result = await getJson("/api/ask", {
                 method: "POST",
-                headers: { "Content-Type": "application/json" },
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-Ask-Passcode": passcode.value,
+                },
                 body: JSON.stringify({ question }),
             });
 
@@ -297,6 +301,12 @@ async function start() {
     const health = await getJson("/api/health").catch(() => null);
     if (health) {
         document.getElementById("asof").textContent = `Figures as of ${formatDate(health.asOfDate, longDate)}`;
+        
+        if (health.askRequiresPasscode) {
+            document.getElementById("passcode-row").hidden = false;
+            document.querySelector(".ask .hint").textContent = 
+                "Every figure in an answer comes from your own numbers. Live questions in this demo need a passcode; the video shows it in action.";
+        }
     }
 
     document.querySelectorAll('input[name="split"]').forEach(radio => {

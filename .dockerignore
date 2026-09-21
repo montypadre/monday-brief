@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+**/App_Data/
+.git/
+.vs/
+.vscode/
+tests/
+data/
+wordpress/
+scripts/
+*.md

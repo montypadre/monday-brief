@@ -106,6 +106,10 @@ tbody th { font-weight: 400; font-size: 0.9375rem; color: var(--ink); }
 .loading { color: var(--ink-soft); }
 .error { color: var(--brick); }
 
+.passcode-row { display: grid; gap: 0.5rem; }
+.passcode-row[hidden] { display: none; }
+#passcode { padding: 0.65rem 0.75rem; border: 1px solid var(--ink-soft); background: #fff; font: inherit; color: var(--ink); max-width: 16rem; }
+
 .visually-hidden {
     position: absolute; width: 1px; height: 1px;
     margin: -1px; padding: 0; overflow: hidden;
