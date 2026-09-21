@@ -55,6 +55,8 @@ The dashboard works without an API key. For `/ask` and `/brief`:
 dotnet user-secrets --project src/MondayBrief.Api set "Anthropic:ApiKey" "sk-ant-..."
 ```
 
+**Live demo:** https://monday-brief.onrender.com - hosted on a free tier, so the first visit after a quiet spell takes about a minute to wake. Live questions need a passcode; the demo video shows in action.
+
 ## Testing
 
 ```bash
@@ -111,6 +113,7 @@ WCAG 2.1 Level AA, verified by keyboard walkthrough, Lighthouse, and a screen-re
 - Evals were run against Claude Haiku 4.5. Other models would need their own run.
 - Single-tenant: one business, one dataset, no authentication on the dashboard.
 - Designed and tested over one weekend.
+- The deployed demo serves a fixed snapshot of the database. Live questions are passcode-gated to keep API costs at zero.
 
 ## Layout
 

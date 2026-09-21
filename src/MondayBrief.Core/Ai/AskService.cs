@@ -2,13 +2,19 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using Microsoft.Extensions.Options;
 using MondayBrief.Core.Kpis;
 using MondayBrief.Core.Options;
 
 namespace MondayBrief.Core.Ai;
 
-public sealed record AskSource(string Tool, string Arguments, bool Ok, string? Error, string Payload);
+public sealed record AskSource(
+    string Tool, 
+    string Arguments, 
+    bool Ok, 
+    string? Error, 
+    [property: JsonIgnore] string Payload);
 
 public sealed record AskResult(
     string Question,
