@@ -41,6 +41,54 @@ function deltaText(card) {
     return { text: `${symbol} ${direction} ${size}${points} on the period before`, cls: direction };
 }
 
+const metricNames = {
+    revenue: "revenue",
+    orders: "orders",
+    aov: "average order value",
+    sessions: "website sessions",
+    conversion: "online conversion",
+};
+
+const channelNames = { online: "online", instore: "in-store" };
+
+function capitalize(text) {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+}
+
+function dateSpan(start, end) {
+    return start && end ? `${formatDate(start, longDate)} to ${formatDate(end, longDate)}` : "";
+}
+
+/** Turns "metric=revenue, start=..." into plain words an owner can read. */
+function describeSource(source) {
+    const args = Object.fromEntries(
+        source.arguments.split(", ").filter(Boolean).map(pair => pair.split("="))
+    );
+
+    const metric = metricNames[args.metric] ?? args.metric ?? "";
+    const channel = channelNames[args.channel] ? `${channelNames[args.channel]} ` : "";
+
+    let text;
+    switch(source.tool) {
+        case "get_metric":
+            text = `${capitalize(channel + metric)}, ${dateSpan(args.start, args.end)}`;
+            break;
+        case "compare_periods":
+            text = `${capitalize(channel + metric)}, ${dateSpan(period_a_end)} compared with ${dateSpan(args.period_b_start, args.period_b_end)}`;
+            break;
+        case "top_products":
+            text = `${args.direction === "declining" ? "Products falling fastest" : "Best sellers"}, ${dateSpan(args.start, args.end)}`;
+            break;
+        case "list_alerts":
+            text = args.start ? `Alerts, ${dateSpan(args.start, args.end)}` : "Current alerts";
+            break;
+        default:
+            text = source.tool;
+    }
+
+    return source.ok ? text : `${text} (no data available)`;
+}
+
 async function loadBrief() {
     const body = document.getElementById("brief-body");
     const meta = document.getElementById("brief-meta");
@@ -246,9 +294,9 @@ async function loadAlerts() {
 function setUpAsk() {
     const form = document.getElementById("ask-form");
     const input = document.getElementById("question");
+    const passcode = document.getElementById("passcode");
     const button = document.getElementById("ask-button");
     const output = document.getElementById("answer");
-    const passcode = document.getElementById("passcode");
 
     form.addEventListener("submit", async event => {
         event.preventDefault();
@@ -278,18 +326,27 @@ function setUpAsk() {
                 const heading = document.createElement("p");
                 heading.className = "sources";
                 heading.textContent = "Sources";
+
                 const sources = document.createElement("ul");
                 sources.className = "sources";
+
                 result.sources.forEach(source => {
                     const item = document.createElement("li");
-                    item.textContent = `${source.tool}(${source.arguments})${source.ok ? "" : " — no data"}`;
+                    // Plain words for the owner; the raw call stays available on hover.
+                    item.textContent = describeSource(source);
+                    item.title = `${source.tool}(${source.arguments})`;
                     sources.appendChild(item);
                 });
+
                 output.appendChild(heading);
                 output.appendChild(sources);
             }
         } catch (error) {
-            output.innerHTML = `<p class="error">${error.message}</p>`;
+            output.innerHTML = "";
+            const message = document.createElement("p");
+            message.className = "error";
+            message.textContent = error.message;
+            output.appendChild(message);
         } finally {
             button.disabled = false;
             button.textContent = "Ask";
