@@ -23,8 +23,8 @@ public sealed class BriefService(
     /// <summary>Weekly product ranking floor. Lower than the 4-week floor because a week holds fewer units.</summary>
     private const int MinWeeklyUnits = 30;
 
-    private const int MinWords = 110;
-    private const int MaxWords = 170;
+    public const int MinWords = 120;
+    public const int MaxWords = 160;
 
     private static readonly JsonSerializerOptions FactJson = new()
     {

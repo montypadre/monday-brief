@@ -88,9 +88,9 @@ public sealed class EvalRunner(AskService ask, BusinessTools tools, BriefService
             problems.Add("did not mention the declining candle");
         }
 
-        if (words is < 120 or > 160)
+        if (words is < BriefService.MinWords or > BriefService.MaxWords)
         {
-            problems.Add($"{words} words, outside 120-160");
+            problems.Add($"{words} words, outside {BriefService.MinWords}-{BriefService.MaxWords}");
         }
 
         if (unsupported.Count > 0)
