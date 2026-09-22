@@ -34,7 +34,7 @@ public sealed class BriefServiceTests(IngestedDatabaseFixture fixture) : IClassF
     }
 
     [Fact]
-    public void Latest_week_is_the_moday_to_sunday_before_today()
+    public void Latest_week_is_the_monday_to_sunday_before_today()
     {
         Assert.Equal(new DateOnly(2026, 8, 24), Service(new FakeAnthropicClient()).LatestWeekStart());
     }
@@ -85,7 +85,7 @@ public sealed class BriefServiceTests(IngestedDatabaseFixture fixture) : IClassF
     }
 
     [Fact]
-    public async Task Regenrating_repalces_rather_than_duplicates()
+    public async Task Regenerating_replaces_rather_than_duplicates()
     {
         var service = Service(new FakeAnthropicClient(FakeAnthropicClient.Text(ValidBrief)));
 

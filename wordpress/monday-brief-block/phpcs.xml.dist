@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<ruleset name="Monday Brief BLock">
+    <description>WordPress Coding Standards for the Monday Brief Block.</description>
+
+    <file>.</file>
+    <arg name="extensions" value="php"/>
+    <arg value="sp"/>
+    <!-- WordPress core requires this exact filename; it's a dependency manifest with nothing to lint. -->
+    <exclude-pattern>block/index\.asset\.php</exclude-pattern>
+
+    <rule ref="WordPress"/>
+
+    <config name="minimum_wp_version" value="6.5"/>
+
+    <!-- Every translatable string must use this plugin's text domain. -->
+    <rule ref="WordPress.WP.I18n">
+        <properties>
+            <property name="text_domain" type="array">
+                <element value="monday-brief-block"/>
+            </property>
+        </properties>
+    </rule>    
+</ruleset>

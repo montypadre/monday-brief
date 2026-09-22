@@ -1,5 +1,4 @@
 <?php
-
 /**
  * Plugin Name:          Monday Brief Block
  * Description:          Shows the latest weekly business brief and headline KPIs from a Monday Brief API.
@@ -16,23 +15,23 @@
 
 declare(strict_types=1);
 
-if (! defined('ABSPATH')) {
-    exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
 }
 
-define('MONDAY_BRIEF_BLOCK_VERSION', '0.2.0');
-define('MONDAY_BRIEF_BLOCK_DIR', plugin_dir_path(__FILE__));
-define('MONDAY_BRIEF_BLOCK_OPTION', 'monday_brief_block_settings');
-define('MONDAY_BRIEF_BLOCK_CACHE', 'monday_brief_block_summary');
-define('MONDAY_BRIEF_BLOCK_FAILURE', 'monday_brief_block_failure');
-define('MONDAY_BRIEF_BLOCK_LAST_GOOD', 'monday_brief_block_last_good');
+define( 'MONDAY_BRIEF_BLOCK_VERSION', '0.2.0' );
+define( 'MONDAY_BRIEF_BLOCK_DIR', plugin_dir_path( __FILE__ ) );
+define( 'MONDAY_BRIEF_BLOCK_OPTION', 'monday_brief_block_settings' );
+define( 'MONDAY_BRIEF_BLOCK_CACHE', 'monday_brief_block_summary' );
+define( 'MONDAY_BRIEF_BLOCK_FAILURE', 'monday_brief_block_failure' );
+define( 'MONDAY_BRIEF_BLOCK_LAST_GOOD', 'monday_brief_block_last_good' );
 
 require_once MONDAY_BRIEF_BLOCK_DIR . 'includes/settings.php';
 require_once MONDAY_BRIEF_BLOCK_DIR . 'includes/client.php';
 
 add_action(
-    'init',
-    static function (): void {
-        register_block_type(MONDAY_BRIEF_BLOCK_DIR . 'block');
-    }
+	'init',
+	static function (): void {
+		register_block_type( MONDAY_BRIEF_BLOCK_DIR . 'block' );
+	}
 );

@@ -16,7 +16,7 @@ public sealed class BusinessClockTests
     }
 
     [Fact]
-    public void WInter_offset_is_six_hours()
+    public void Winter_offset_is_six_hours()
     {
         // CST (UTC-6) in December: 7:00 am local is 13:00 UTC.
         var local = new DateTime(2025, 12, 13, 7, 0, 0);

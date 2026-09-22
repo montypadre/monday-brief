@@ -1,12 +1,12 @@
 <?php
 /**
  * Removes everything the plugin stored.
- * 
+ *
  * @package MondayBriefBlock
  */
 
 if ( ! defined( 'WP_UNINSTALL_PLUGIN' ) ) {
-    exit;
+	exit;
 }
 
 delete_option( 'monday_brief_block_settings' );
